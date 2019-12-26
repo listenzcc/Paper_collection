@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<header>
+    <meta charset="utf-8"></meta>
+    <title> Paper explorer </title>
+    <link rel="stylesheet" href="style.css" type="text/css"></link>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+</header>
+
+<body>
+    <div id="top_bar">
+        <h1> Top Bar </h1>
+    </div>
+
+    <div>
+        <div id="left_bar">
+            <h1> Left Bar </h1>
+        </div>
+
+        <div id="pdf_container">
+            <h1> PDF container </h1>
+            <iframe id="pdf_iframe" width="800px" height="1000px"></iframe>
+            <p id="paper_path"> PDF name </p>
+        </div>
+
+        <div id="right_bar">
+            <h1> Right Bar </h1>
+            <button id="update_button"> Update </button>
+            <h2> Title </h2>
+            <div>
+                <textarea id="paper_title"></textarea>
+            </div>
+            <h2> DOI </h2>
+            <div>
+                <textarea id="paper_doi"></textarea>
+            </div>
+            <p> Something else.</p>
+            <div>
+                <textarea id="comment"></textarea>
+            </div>
+        </div>
+    </div>
+
+    <script src="local_func.js"></script>
+</body>
+
+</html>
