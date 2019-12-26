@@ -38,4 +38,17 @@ d3.select("#update_button")
         console.log("Title is " + title)
     })
 
+d3.select("#comment")
+    .attr("oninput", "auto_grow(this)")
+
+function auto_grow(element) {
+    console.log(element.scrollHeight)
+    console.log(element.clientHeight)
+    if (element.scrollHeight < 500) {
+        if (element.scrollHeight > element.clientHeight) {
+            element.style.height = (element.scrollHeight) + "px"
+        }
+    }
+}
+
 console.log('Done')
