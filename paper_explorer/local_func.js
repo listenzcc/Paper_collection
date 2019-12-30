@@ -1,4 +1,5 @@
-d3.json("../paper_jsons/papers.json").then(function(papers) {
+d3.json("http://localhost:8619/?|file=../paper_jsons/papers.json").then(function(papers) {
+    console.log(papers)
     d3.select("#left_bar")
         .append("ol")
         .selectAll("ol")
@@ -31,12 +32,20 @@ d3.json("../paper_jsons/papers.json").then(function(papers) {
 
 d3.select("#update_button")
     .on("click", function() {
-        var title = document.getElementById("paper_title").textContent
-        if (title.length == 0) {
-            title = document.getElementById("paper_title").placeholder
-        }
-        console.log("Title is " + title)
+        console.log("[Title] " + get_textarea("paper_title"))
     })
+
+function get_textarea(id) {
+    // Get DOM by id
+    ta = document.getElementById(id)
+
+    // Return value or placeholder
+    if (ta.textLength == 0) {
+        return ta.placeholder
+    } else {
+        return ta.value
+    }
+}
 
 d3.select("#comment")
     .attr("oninput", "auto_grow(this)")

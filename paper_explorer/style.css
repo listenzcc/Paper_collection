@@ -1,38 +1,49 @@
 #top_bar {
     left: 0;
-    width: 1615px;
+    width: 100%;
     background-color: bisque
 }
 
 #left_bar {
     position: absolute;
     left: 5px;
-    width: 400px;
+    width: 20%;
     background-color: aquamarine
 }
 
 #pdf_container {
     position: fixed;
-    left: 410px;
-    width: 800px;
+    left: 20%;
+    width: 60%;
     background-color: cornflowerblue
 }
 
 #right_bar {
     position: fixed;
-    left: 1215px;
-    width: 400px;
+    left: 80%;
+    width: 20%;
     background-color: lightsteelblue
 }
 
 #paper_title {
-    width: 380px;
-    height: 60px
+    width: 80%;
+    height: 80px;
+    box-sizing: border-box;
+    resize: none;
 }
 
 #paper_doi {
-    width: 380px;
-    height: 30px
+    width: 80%;
+    height: 40px;
+    box-sizing: border-box;
+    resize: none;
+}
+
+#paper_keywords {
+    width: 80%;
+    height: 40px;
+    box-sizing: border-box;
+    resize: none;
 }
 
 #comment {

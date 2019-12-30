@@ -9,40 +9,44 @@
 </header>
 
 <body>
+    <!-- Solgan -->
     <div id="top_bar">
         <h1> Top Bar </h1>
     </div>
 
-    <div>
+    <div id="! a b">
+        <!-- Paper list -->
         <div id="left_bar">
-            <h1> Left Bar </h1>
+            <h1> Paper List </h1>
         </div>
-
+        <!-- PDF reader -->
         <div id="pdf_container">
-            <h1> PDF container </h1>
-            <iframe id="pdf_iframe" width="800px" height="1000px"></iframe>
+            <h1> PDF Reader </h1>
+            <iframe id="pdf_iframe" width="100%" height="1000px"></iframe>
             <p id="paper_path"> PDF name </p>
         </div>
-
+        <!-- PDF infomation -->
         <div id="right_bar">
-            <h1> Right Bar </h1>
+            <h1> PDF info </h1>
+            <!-- update button -->
             <button id="update_button"> Update </button>
+            <!-- Paper title -->
             <h2> Title </h2>
-            <div>
-                <textarea id="paper_title"></textarea>
-            </div>
+            <textarea id="paper_title"></textarea>
+            <!-- Paper DOI -->
             <h2> DOI </h2>
-            <div>
-                <textarea id="paper_doi"></textarea>
-            </div>
+            <textarea id="paper_doi"></textarea>
+            <!-- Paper Keywords -->
+            <h2> Keywords </h2>
+            <textarea id="paper_keywords"></textarea>
+            <!-- Something else -->
             <p> Something else.</p>
-            <div>
-                <textarea id="comment"></textarea>
-            </div>
+            <textarea id="comment"></textarea>
         </div>
     </div>
 
     <script src="local_func.js"></script>
 </body>
+
 
 </html>
