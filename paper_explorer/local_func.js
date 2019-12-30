@@ -1,4 +1,4 @@
-d3.json("papers.json").then(function(papers) {
+d3.json("../paper_jsons/papers.json").then(function(papers) {
     d3.select("#left_bar")
         .append("ol")
         .selectAll("ol")
