@@ -1,6 +1,6 @@
 // Load papers
-d3.json("http://localhost:8619/?get=raw").then(function(papers) {
-    init_papers(papers)
+d3.json("http://localhost:8619/?get=raw").then(function(raw) {
+    init_papers(raw)
 })
 
 // Bound paper information
@@ -40,6 +40,10 @@ function init_papers(papers) {
         d3.select("#pdf_iframe")
             .attr("src", d.rawpath)
 
+        // Append rawpath session
+        d3.select("#paper_path")
+            .text(d.rawpath)
+
         // Append title session
         d3.select("#paper_title")
             .attr("placeholder", d.title)
@@ -48,9 +52,9 @@ function init_papers(papers) {
         d3.select("#paper_doi")
             .attr("placeholder", d.doi)
 
-        // Append rawpath session
-        d3.select("#paper_path")
-            .text(d.rawpath)
+        // Append uid session
+        d3.select("#paper_uid")
+            .text(d.uid)
     })
 }
 
@@ -61,6 +65,13 @@ function update_paper() {
     console.log("[DOI]      " + get_textarea("paper_doi"))
     console.log("[Keywords] " + get_textarea("paper_keywords"))
     console.log("[Comments] " + get_textarea("paper_comments"))
+
+    rawpath = d3.select("#paper_path").text()
+    uid = d3.select("#paper_uid").text()
+    url = "http://localhost:8619/?set=custom,uid=" + uid + ",rawpath=" + rawpath
+    d3.json(url).then(function(custom) {
+        console.log(custom)
+    })
 }
 
 // Safety get value of textarea

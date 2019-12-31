@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import hashlib
 import webbrowser
 import urllib.parse
 import pandas as pd
@@ -15,7 +16,30 @@ raw_df = pd.read_json(os.path.join('..', 'paper_jsons', 'raw.json'))
 custom_df = pd.read_json(os.path.join('..', 'paper_jsons', 'custom.json'))
 
 
+def update_custom(df, query):
+    uid = query.get('uid', 'uid')
+    rawpath = query.get('rawpath', 'rawpath')
+    rawpath = rawpath.replace('%20', ' ').replace('\\\\', '\\')
+
+    if not hashlib.new('md5', rawpath.encode()).hexdigest() == uid:
+        print('Error ' * 10)
+        print(uid)
+        print(hashlib.new('md5', rawpath.encode()).hexdigest())
+        raise Exception('Hash md5 not match.')
+
+    for key in query:
+        if key in ['uid', 'rawpath']:
+            continue
+        se = pd.Series(dict(
+            key=query[key],
+        ), name=uid)
+        df = df.append(se)
+
+    return df
+
+
 class Resquest(BaseHTTPRequestHandler):
+
     def do_GET(self):
         # Overwrite do_GET method of BaseHTTPRequestHandler
         # Send 200 response
@@ -33,12 +57,23 @@ class Resquest(BaseHTTPRequestHandler):
         if self.query.get('get', '') == 'custom':
             self.wfile.write(custom_df.to_json(orient='records').encode())
             return
+        # Update custom_df
+        if self.query.get('set', '') == 'custom':
+            try:
+                tmp = update_custom(custom_df, self.query)
+                custom_df = tmp
+            except Exception as e:
+                self.error_message(repr(e))
+            pprint(custom_df.to_string())
+            self.wfile.write(custom_df.to_json(orient='records').encode())
+            return
         # Hello there
         self.wfile.write(json.dumps([
             'Hello there.',
             '?get=raw: get raw_df.json',
-            '?get=custom: get custom_df.json'
-            ]).encode())
+            '?get=custom: get custom_df.json',
+            '?set=custom, uid=[], rawpath=[]: set custom_df.json as uid and rawpath'
+        ]).encode())
 
     def error_message(self, error_message):
         message = dict(
@@ -46,16 +81,14 @@ class Resquest(BaseHTTPRequestHandler):
             query=self.query,
             error=error_message
         )
+        self.log_messages(message)
         return message
 
     def log_messages(self, messages='[None]', end=''):
         # Logger
         print('-' * 80)
         print('[{}]'.format(time.time()))
-        if isinstance(messages, str):
-            messages = [messages]
-        for message in messages:
-            pprint(message)
+        pprint(messages)
         print(end)
 
     def urlparse(self):
