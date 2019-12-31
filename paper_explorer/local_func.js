@@ -1,40 +1,69 @@
-d3.json("http://localhost:8619/?|file=../paper_jsons/papers.json").then(function(papers) {
+// Load papers
+d3.json("http://localhost:8619/?get=raw").then(function(papers) {
+    init_papers(papers)
+})
+
+// Bound paper information
+d3.select("#update_button")
+    .on("click", () => update_paper())
+
+// Init papers
+function init_papers(papers) {
     console.log(papers)
-    d3.select("#left_bar")
-        .append("ol")
+
+    // Work on paper_list
+    paper_list = d3.select("#left_bar")
         .selectAll("ol")
         .data(papers)
         .enter()
-        .append("li")
+
+    // Add <li> for each paper
+    paper_list.append("li")
         .text((d) => d.title)
-        .on("click", function(d) {
-            console.log(d.title)
-            console.log(d.doi)
-            console.log(d.rawpath)
+        .attr("id", (d) => "li-" + d.uid)
+        .attr("class", (d) => "li-papers")
 
-            // Display the paper
-            d3.select("#pdf_iframe")
-                .attr("src", d.rawpath)
+    // Bound click event
+    .on("click", function(d) {
+        // Report
+        console.log(d.title)
+        console.log(d.doi)
+        console.log(d.rawpath)
+        console.log(d.uid)
 
-            // Append title session
-            d3.select("#paper_title")
-                .attr("placeholder", d.title)
+        d3.selectAll(".li-papers")
+            .attr("style", "color:gray")
+        d3.select("#li-" + d.uid)
+            .attr("style", "color:red")
 
-            // Append doi session
-            d3.select("#paper_doi")
-                .attr("placeholder", d.doi)
+        // Display the paper
+        d3.select("#pdf_iframe")
+            .attr("src", d.rawpath)
 
-            // Append rawpath session
-            d3.select("#paper_path")
-                .text(d.rawpath)
-        })
-})
+        // Append title session
+        d3.select("#paper_title")
+            .attr("placeholder", d.title)
 
-d3.select("#update_button")
-    .on("click", function() {
-        console.log("[Title] " + get_textarea("paper_title"))
+        // Append doi session
+        d3.select("#paper_doi")
+            .attr("placeholder", d.doi)
+
+        // Append rawpath session
+        d3.select("#paper_path")
+            .text(d.rawpath)
     })
+}
 
+// Update paper information
+function update_paper() {
+    console.log('-----------------------------------------------------------')
+    console.log("[Title]    " + get_textarea("paper_title"))
+    console.log("[DOI]      " + get_textarea("paper_doi"))
+    console.log("[Keywords] " + get_textarea("paper_keywords"))
+    console.log("[Comments] " + get_textarea("paper_comments"))
+}
+
+// Safety get value of textarea
 function get_textarea(id) {
     // Get DOM by id
     ta = document.getElementById(id)
@@ -44,19 +73,6 @@ function get_textarea(id) {
         return ta.placeholder
     } else {
         return ta.value
-    }
-}
-
-d3.select("#comment")
-    .attr("oninput", "auto_grow(this)")
-
-function auto_grow(element) {
-    console.log(element.scrollHeight)
-    console.log(element.clientHeight)
-    if (element.scrollHeight < 500) {
-        if (element.scrollHeight > element.clientHeight) {
-            element.style.height = (element.scrollHeight) + "px"
-        }
     }
 }
 
