@@ -60,15 +60,27 @@ function init_papers(papers) {
 
 // Update paper information
 function update_paper() {
-    console.log('-----------------------------------------------------------')
-    console.log("[Title]    " + get_textarea("paper_title"))
-    console.log("[DOI]      " + get_textarea("paper_doi"))
-    console.log("[Keywords] " + get_textarea("paper_keywords"))
-    console.log("[Comments] " + get_textarea("paper_comments"))
-
+    title = get_textarea("paper_title")
+    doi = get_textarea("paper_doi")
+    keywords = get_textarea("paper_keywords")
+    comments = get_textarea("paper_comments")
     rawpath = d3.select("#paper_path").text()
     uid = d3.select("#paper_uid").text()
-    url = "http://localhost:8619/?set=custom,uid=" + uid + ",rawpath=" + rawpath
+    url = "http://localhost:8619/?set=custom" +
+        ",uid=" + uid +
+        ",rawpath=" + rawpath +
+        ",title=" + title +
+        ",keywords=" + keywords +
+        ",comments=" + comments
+    url = `http://localhost:8619/?set=custom&uid=${uid}&rawpath=${rawpath}&title=${title}&keywords=${keywords}&comments=${comments}`
+
+
+    console.log('-----------------------------------------------------------')
+    console.log("[Title]    " + title)
+    console.log("[DOI]      " + doi)
+    console.log("[Keywords] " + keywords)
+    console.log("[Comments] " + comments)
+
     d3.json(url).then(function(custom) {
         console.log(custom)
     })

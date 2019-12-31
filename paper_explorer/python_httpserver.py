@@ -15,28 +15,33 @@ host = (domain, port)
 raw_df = pd.read_json(os.path.join('..', 'paper_jsons', 'raw.json'))
 custom_df = pd.read_json(os.path.join('..', 'paper_jsons', 'custom.json'))
 
+class DataWorker():
+    def __init__(self):
+        self.raw_df = pd.read_json(os.path.join('..', 'paper_jsons', 'raw.json'))
+        self.custom_df = pd.read_json(os.path.join('..', 'paper_jsons', 'custom.json'))
 
-def update_custom(df, query):
-    uid = query.get('uid', 'uid')
-    rawpath = query.get('rawpath', 'rawpath')
-    rawpath = rawpath.replace('%20', ' ').replace('\\\\', '\\')
+    def update_custom(self, query):
+        uid = query.get('uid', 'uid')
+        rawpath = query.get('rawpath', 'rawpath')
+        rawpath = rawpath.replace('%20', ' ').replace('\\\\', '\\')
 
-    if not hashlib.new('md5', rawpath.encode()).hexdigest() == uid:
-        print('Error ' * 10)
-        print(uid)
-        print(hashlib.new('md5', rawpath.encode()).hexdigest())
-        raise Exception('Hash md5 not match.')
+        if not hashlib.new('md5', rawpath.encode()).hexdigest() == uid:
+            print('Error ' * 10)
+            print(uid)
+            print(hashlib.new('md5', rawpath.encode()).hexdigest())
+            raise Exception('Hash md5 not match.')
 
-    for key in query:
-        if key in ['uid', 'rawpath']:
-            continue
-        se = pd.Series(dict(
-            key=query[key],
-        ), name=uid)
-        df = df.append(se)
+        se = pd.Series(name=uid)
 
-    return df
+        for key in query:
+            if key in ['uid', 'rawpath', 'set']:
+                continue
+            se[key] = query[key]
+        self.custom_df = self.custom_df.append(se)
 
+        self.custom_df[self.custom_df.isna()] = '--'
+
+worker = DataWorker()
 
 class Resquest(BaseHTTPRequestHandler):
 
@@ -51,21 +56,20 @@ class Resquest(BaseHTTPRequestHandler):
         self.urlparse()
         # Get raw_df
         if self.query.get('get', '') == 'raw':
-            self.wfile.write(raw_df.to_json(orient='records').encode())
+            self.wfile.write(worker.raw_df.to_json(orient='records').encode())
             return
         # Get custom_df
         if self.query.get('get', '') == 'custom':
-            self.wfile.write(custom_df.to_json(orient='records').encode())
+            self.wfile.write(worker.custom_df.to_json(orient='records').encode())
             return
         # Update custom_df
         if self.query.get('set', '') == 'custom':
             try:
-                tmp = update_custom(custom_df, self.query)
-                custom_df = tmp
+                worker.update_custom(self.query)
             except Exception as e:
                 self.error_message(repr(e))
-            pprint(custom_df.to_string())
-            self.wfile.write(custom_df.to_json(orient='records').encode())
+            pprint(worker.custom_df.to_string())
+            self.wfile.write(worker.custom_df.to_json(orient='records').encode())
             return
         # Hello there
         self.wfile.write(json.dumps([
@@ -97,7 +101,7 @@ class Resquest(BaseHTTPRequestHandler):
         # Format self.query
         self.query = dict()
         # Parse query in requests
-        for query in parsed.query.split(','):
+        for query in parsed.query.split('&'):
             # Ignore inlegal query
             if '=' not in query:
                 continue
