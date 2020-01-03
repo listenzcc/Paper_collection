@@ -1,69 +1,28 @@
 import os
 import time
 import json
-import hashlib
 import webbrowser
 import urllib.parse
-import pandas as pd
 from pprint import pprint
+from local_toolbox import DataWorker
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
+# Init host
 domain = 'localhost'
 port = 8619
 host = (domain, port)
 
-raw_df = pd.read_json(os.path.join('..', 'paper_jsons', 'raw.json'))
-custom_df = pd.read_json(os.path.join('..', 'paper_jsons', 'custom.json'))
+# Init data workers
+paths = dict(
+    pdfdir=os.path.join(os.environ['ONEDRIVE'],
+                        'Documents', 'schorlar', 'buffer'),
+    raw_df=os.path.join('..', 'paper_jsons', 'raw.json'),
+    custom_df=os.path.join('..', 'paper_jsons', 'custom.json')
+)
+worker = DataWorker(paths)
 
-class DataWorker():
-    def __init__(self):
-        # Init path and df
-        # pdfpath: path of pdf files
-        # custom_df: custom df
-        # raw_df: raw df
-        self.pdfpath = 'C:\\Users\\liste\\OneDrive\\Documents\\schorlar\\buffer'
-        self.raw_df = pd.read_json(os.path.join('..', 'paper_jsons', 'raw.json'))
-        self.custom_df = pd.read_json(os.path.join('..', 'paper_jsons', 'custom.json'))
-
-    def update_custom(self, query):
-        # Update custom df as query
-        uid = query.get('uid', 'uid')
-        # New Series
-        se = pd.Series(name=uid)
-        # Inject items as query
-        for key in query:
-            if key in ['uid', 'rawpath', 'set']:
-                continue
-            se[key] = query[key]
-        # Override uid row of custom_df
-        self.custom_df.drop(index=uid, inplace=True, errors='ignore')
-        self.custom_df = self.custom_df.append(se)
-        # Replace NaN into '--'
-        self.custom_df[self.custom_df.isna()] = ''
-        print(self.custom_df)
-    
-    def get_pdf(self, fname):
-        # Get pdf from pdfpath
-        # fname: fname of pdf file
-        # Replace %20 into [space]
-        fname = fname
-        fullpath = os.path.join(self.pdfpath, fname)
-
-        # Check if file exists
-        # Return if not
-        if not os.path.exists(fullpath):
-            raise FileNotFoundError(fullpath)
-
-        # Read pdf file and return as bytes
-        with open(fullpath, 'rb') as fp:
-            pdf_bits_list = fp.readlines()
-        return b''.join(pdf_bits_list)
-
-# Init worker
-worker = DataWorker()
 
 class Resquest(BaseHTTPRequestHandler):
-
     def do_GET(self):
         # Overwrite do_GET method of BaseHTTPRequestHandler
         # Send 200 response
@@ -145,12 +104,12 @@ class Resquest(BaseHTTPRequestHandler):
         self.log_messages([parsed, self.query])
 
 
+server = HTTPServer(host, Resquest)
+print('Starting server, listen at: {domain}:{port}'.format(
+    domain=domain, port=port))
+
 if __name__ == '__main__':
-    server = HTTPServer(host, Resquest)
-    print('Starting server, listen at: {domain}:{port}'.format(
-        domain=domain, port=port))
-    url = 'http://{domain}:{port}'.format(
-        domain=domain, port=port)
+    url = 'http://{domain}:{port}'.format(domain=domain, port=port)
     webbrowser.open(url)
     try:
         server.serve_forever()
