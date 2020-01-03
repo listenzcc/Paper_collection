@@ -1,17 +1,18 @@
 // Load papers
 d3.json("http://localhost:8619/?get=raw").then(function(raw) {
-    init_papers_raw(raw)
+    init_page(raw)
 })
 
 // Bound paper information
 d3.select("#update_button")
     .on("click", () => update_custom())
 
-// Init papers
-function init_papers_raw(papers) {
+// Init page
+// papers: raw papers read from raw json
+function init_page(papers) {
     console.log(papers)
 
-    // Work on paper_list
+    // Build paper list on left_bar
     paper_list = d3.select("#left_bar")
         .append("ol")
         .selectAll()
@@ -22,11 +23,10 @@ function init_papers_raw(papers) {
         .text((d) => d.title)
         .attr("id", (d) => "li-" + d.uid)
         .attr("class", (d) => "li-papers")
-
-    // Bound click event
-    .on("click", function(d) {
-        display_paper(d)
-    })
+        // Bound click event
+        .on("click", function(d) {
+            display_paper(d)
+        })
 }
 
 // Display paper
@@ -38,6 +38,7 @@ function display_paper(d) {
     console.log(d.uid)
     console.log(d.fname)
 
+    // Highlight clicked <li>
     d3.selectAll(".li-papers")
         .attr("style", "color:gray")
     d3.select("#li-" + d.uid)
@@ -75,14 +76,22 @@ function update_paper(d, custom) {
     // Report
     console.log(d.uid)
 
-    // Override paper title
+    // Init paper information
     document.getElementById("paper_title").value = ""
-    if (custom.title[d.uid]) {
-        document.getElementById("paper_title").value = custom.title[d.uid]
-    }
     document.getElementById("paper_doi").value = ""
     document.getElementById("paper_keywords").value = ""
     document.getElementById("paper_comments").value = ""
+
+    // Override paper information with custom
+    if (custom.title[d.uid]) {
+        document.getElementById("paper_title").value = custom.title[d.uid]
+    }
+    if (custom.keywords[d.uid]) {
+        document.getElementById("paper_keywords").value = custom.keywords[d.uid]
+    }
+    if (custom.comments[d.uid]) {
+        document.getElementById("paper_comments").value = custom.comments[d.uid]
+    }
 }
 
 // Update custom using paper information
