@@ -1,3 +1,4 @@
+import os
 import time
 import json
 import urllib.parse
@@ -23,7 +24,7 @@ class ResquestHandler(BaseHTTPRequestHandler):
         print(datas)
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Content', 'application/text')
+        self.send_header('Content-Type', 'application/text')
         self.end_headers()
         x = urllib.parse.unquote(datas.decode())
         print(x)
@@ -31,6 +32,7 @@ class ResquestHandler(BaseHTTPRequestHandler):
 
 server = HTTPServer(host, ResquestHandler)
 try:
+    print("Server starts.")
     server.serve_forever()
 except KeyboardInterrupt:
     print('Interrupted')

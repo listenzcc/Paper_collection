@@ -2,7 +2,7 @@
 <header>
     <meta charset="utf-8" />
     <title> HTML get post example </title>
-    <script src="https://www.w3school.com.cn/jquery/jquery-1.11.1.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 
 </header>
 
@@ -23,6 +23,7 @@
                 $.post("http://localhost:8619", {
                         date: String(new Date()),
                         if1: document.getElementById("if1").value,
+                        a: "b"
                     },
                     function(data, status) {
                         console.log(data)
