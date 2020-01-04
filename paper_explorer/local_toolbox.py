@@ -21,16 +21,14 @@ class DataWorker():
         else:
             self.custom_df = pd.read_json(paths.get('custom_df'))
 
-    def update_custom(self, query):
+    def update_custom(self, query, datas):
         # Update custom df as query
         uid = query.get('uid', 'uid')
         # New Series
-        se = pd.Series(name=uid)
-        # Inject items as query
-        for key in query:
-            if key in ['uid', 'rawpath', 'set']:
-                continue
-            se[key] = query[key]
+        se = pd.Series(datas, name=uid)
+        # # Inject items as datas
+        # for key in datas:
+        #     se[key] = datas[key]
         # Override uid row of custom_df
         self.custom_df.drop(index=uid, inplace=True, errors='ignore')
         self.custom_df = self.custom_df.append(se)
@@ -62,12 +60,39 @@ class DataWorker():
 
 
 class ResquestHandler(BaseHTTPRequestHandler):
-    def send_response_content(self, content_type, content, allow_origin=True):
-        if allow_origin:
+    def send_response_content(self, content_type, content, allow_origin_access=True):
+        # Response 200
+        self.send_response(200)
+        # Allow origin access
+        if allow_origin_access:
             self.send_header('Access-Control-Allow-Origin', '*')
+        # Send correct header
         self.send_header('Content-Type', 'application/{}'.format(content_type))
         self.end_headers()
+        # Send content
         self.wfile.write(content)
+
+    def send_default_json(self):
+        # Hello there
+        self.send_response_content('json', json.dumps([
+            'Hello there.',
+            '?get=raw: get raw_df.json',
+            '?get=custom: get custom_df.json',
+            '?get=pdf&fname=fname: get pdf file of filename',
+            '?set=custom&uid=[xx]: set custom_df.json, note that you should use POST method to provide data'
+        ]).encode())
+
+    def do_POST(self):
+        # Overwrite do_POST method of BaseHTTPRequestHandler
+        # Parse request first
+        self.urlparse()
+        # Parse data
+        datas = self.dataparse(self.rfile.read(int(self.headers['content-length'])))
+        # Link data worker
+        worker = self.server.worker
+        worker.update_custom(self.query, datas)
+        # Send default json
+        self.send_default_json()
 
     def do_GET(self):
         # Overwrite do_GET method of BaseHTTPRequestHandler
@@ -75,9 +100,6 @@ class ResquestHandler(BaseHTTPRequestHandler):
         self.urlparse()
         # Link data worker
         worker = self.server.worker
-
-        # Send 200 response
-        self.send_response(200)
 
         # Get raw_df
         if self.query.get('get', '') == 'raw':
@@ -98,22 +120,17 @@ class ResquestHandler(BaseHTTPRequestHandler):
             return
 
         # Update custom_df
-        if self.query.get('set', '') == 'custom':
-            worker.update_custom(self.query)
-            self.send_response_content(
-                'json', worker.custom_df.to_json().encode())
-            return
+        # if self.query.get('set', '') == 'custom':
+        #     worker.update_custom(self.query)
+        #     self.send_response_content(
+        #         'json', worker.custom_df.to_json().encode())
+        #     return
 
         # Hello there
-        self.send_response_content('json', json.dumps([
-            'Hello there.',
-            '?get=raw: get raw_df.json',
-            '?get=custom: get custom_df.json',
-            '?get=pdf&fname=fname: get pdf file of filename',
-            '?set=custom&uid=[xx]&a=b&c=d: set custom_df.json as uid with a=b, c=d'
-        ]).encode())
+        self.send_default_json()
 
     def error_message(self, error_message):
+        # Log error_message
         message = dict(
             url=self.path,
             query=self.query,
@@ -129,9 +146,24 @@ class ResquestHandler(BaseHTTPRequestHandler):
         pprint(messages)
         print(end)
 
+    def dataparse(self, data):
+        # Parse data from post request
+        # data: data from post request
+        data = urllib.parse.unquote(data.decode())
+        datas = dict()
+        for e in data.split('&'):
+            if not '=' in e:
+                continue
+            a, b = e.split('=', 1)
+            datas[a] = b
+        self.log_messages(datas)
+        return datas
+
     def urlparse(self):
         # Custom urlparse
-        parsed = urllib.parse.urlparse(self.path)
+        # unquote: unquote HTML content
+        # urlparse: parse unquoted path
+        parsed = urllib.parse.urlparse(urllib.parse.unquote(self.path))
         # Format self.query
         self.query = dict()
         # Parse query in requests
@@ -142,6 +174,6 @@ class ResquestHandler(BaseHTTPRequestHandler):
             # Setup query
             a, b = query.split('=', 1)
             # Fix known convertion issue
-            self.query[a] = b.replace('%20', ' ')
+            self.query[a] = b  # .replace('%20', ' ')
         # Log requests
         self.log_messages([parsed, self.query])

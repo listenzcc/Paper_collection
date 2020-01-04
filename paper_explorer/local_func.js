@@ -95,19 +95,37 @@ function update_paper(d, custom) {
 }
 
 // Update custom using paper information
+// function update_custom_using_HTTPGET() {
+//     uid = document.getElementById("paper_uid").innerHTML
+//     url = `http://localhost:8619/?set=custom&uid=${uid}`
+//     url += query_from_textarea("paper_title", "&title")
+//     url += query_from_textarea("paper_keywords", "&keywords")
+//     url += query_from_textarea("paper_comments", "&comments")
+
+//     console.log("Update custom with url:")
+//     console.log(url)
+
+//     d3.json(url).then(function(custom) {
+//         console.log(custom)
+//     })
+// }
+
 function update_custom() {
     uid = document.getElementById("paper_uid").innerHTML
     url = `http://localhost:8619/?set=custom&uid=${uid}`
-    url += query_from_textarea("paper_title", "&title")
-    url += query_from_textarea("paper_keywords", "&keywords")
-    url += query_from_textarea("paper_comments", "&comments")
-
-    console.log("Update custom with url:")
     console.log(url)
 
-    d3.json(url).then(function(custom) {
-        console.log(custom)
-    })
+    $.post(url, {
+            date: String(new Date()),
+            title: query_from_textarea("paper_title", ""),
+            keywords: query_from_textarea("paper_keywords", ""),
+            comments: query_from_textarea("paper_comments", "")
+        },
+        function(data, status) {
+            console.log("Update custom with url:")
+            console.log(url)
+            console.log("Data: " + data + "\nStatus: " + status)
+        });
 }
 
 // Safety build query with content in textarea
@@ -115,11 +133,15 @@ function query_from_textarea(id, name) {
     // Get DOM by id
     ta = document.getElementById(id)
 
+    if (name) {
+        name += "="
+    }
+
     // Return value or placeholder
     if (ta.textLength == 0) {
         return ""
     } else {
-        return name + "=" + ta.value
+        return name + ta.value
     }
 }
 

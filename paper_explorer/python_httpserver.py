@@ -17,7 +17,7 @@ paths = dict(
     raw_df=os.path.join('..', 'paper_jsons', 'raw.json'),
     custom_df=os.path.join('..', 'paper_jsons', 'custom.json')
 )
-worker = DataWorker(paths, newcustom=False)
+worker = DataWorker(paths, newcustom=True)
 
 
 class http_server():
