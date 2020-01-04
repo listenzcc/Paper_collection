@@ -1,0 +1,38 @@
+<html>
+<header>
+    <meta charset="utf-8" />
+    <title> HTML get post example </title>
+    <script src="https://www.w3school.com.cn/jquery/jquery-1.11.1.min.js"></script>
+
+</header>
+
+<body>
+    <h1>HTML get post example</h1>
+    <h1>Input field 1</h1>
+    <input id="if1" type="text" placeholder="if1" onchange="if1_change()"> if1 </input>
+    <script type="text/javascript">
+        document.getElementById("if1").value = ""
+
+        function if1_change() {
+            console.log(new Date())
+            console.log(document.getElementById("if1").value)
+        }
+
+        $(document).ready(function() {
+            $("#if1").change(function() {
+                $.post("http://localhost:8619", {
+                        date: String(new Date()),
+                        if1: document.getElementById("if1").value,
+                    },
+                    function(data, status) {
+                        console.log(data)
+                        alert("Data: " + data + "\nStatus: " + status);
+                    });
+            });
+        });
+    </script>
+    <h1>Get field 1</h1>
+    <p id="gf1">gf1</p>
+</body>
+
+</html>
