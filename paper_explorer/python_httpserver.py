@@ -2,6 +2,7 @@ import os
 import webbrowser
 from local_toolbox import DataWorker
 from local_toolbox import ResquestHandler
+from local_toolbox import http_server
 from http.server import HTTPServer
 
 
@@ -17,25 +18,7 @@ paths = dict(
     raw_df=os.path.join('..', 'paper_jsons', 'raw.json'),
     custom_df=os.path.join('..', 'paper_jsons', 'custom.json')
 )
-worker = DataWorker(paths, newcustom=True)
-
-
-class http_server():
-    def __init__(self, worker, host, request_handler_class):
-        self.server = HTTPServer(host, request_handler_class)
-        self.server.worker = worker
-        print('Starting server, listen at: {}:{}'.format(*host))
-
-    def start(self):
-        try:
-            self.server.serve_forever()
-        except KeyboardInterrupt:
-            print('Interrupted')
-        finally:
-            self.server.worker.save_custom()
-            self.server.server_close()
-
-
+worker = DataWorker(paths, newcustom=False)
 server = http_server(worker, host, ResquestHandler)
 
 

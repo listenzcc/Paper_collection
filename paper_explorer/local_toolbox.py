@@ -7,6 +7,22 @@ from pprint import pprint
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
+class http_server():
+    def __init__(self, worker, host, request_handler_class):
+        self.server = HTTPServer(host, request_handler_class)
+        self.server.worker = worker
+        print('Starting server, listen at: {}:{}'.format(*host))
+
+    def start(self):
+        try:
+            self.server.serve_forever()
+        except KeyboardInterrupt:
+            print('Interrupted')
+        finally:
+            self.server.worker.save_custom()
+            self.server.server_close()
+
+
 class DataWorker():
     def __init__(self, paths, newcustom=False):
         # Init path and df
@@ -22,6 +38,15 @@ class DataWorker():
             self.custom_df = pd.read_json(paths.get('custom_df'))
 
     def update_custom(self, query, datas):
+        # Fix string in datas
+        for e in datas:
+            # True title should not contain '+'
+            datas[e] = datas[e].replace('+', ' ')
+            # Rejoin splited parts
+            datas[e] = ' '.join(datas[e].split(','))
+            while '  ' in datas[e]:
+                datas[e] = datas[e].replace('  ', ' ')
+        print(datas)
         # Update custom df as query
         uid = query.get('uid', 'uid')
         # New Series
@@ -87,7 +112,8 @@ class ResquestHandler(BaseHTTPRequestHandler):
         # Parse request first
         self.urlparse()
         # Parse data
-        datas = self.dataparse(self.rfile.read(int(self.headers['content-length'])))
+        datas = self.dataparse(self.rfile.read(
+            int(self.headers['content-length'])))
         # Link data worker
         worker = self.server.worker
         worker.update_custom(self.query, datas)

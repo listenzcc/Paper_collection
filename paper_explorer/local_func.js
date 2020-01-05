@@ -1,15 +1,30 @@
 // Load papers
 d3.json("http://localhost:8619/?get=raw").then(function(raw) {
-    init_page(raw)
+    d3.json("http://localhost:8619/?get=custom").then(function(custom) {
+        init_pages(raw)
+        init_update_pages(custom)
+    })
 })
 
 // Bound paper information
 d3.select("#update_button")
     .on("click", () => update_custom())
 
-// Init page
+// Init update pages
+function init_update_pages(custom) {
+    console.log('-- init_update_page --')
+    console.log(custom)
+    console.log(custom.title)
+    for (uid in custom.title) {
+        console.log(uid)
+        d3.select("#li-" + uid)
+            .text("[" + custom.title[uid] + "]")
+    }
+}
+
+// Init pages
 // papers: raw papers read from raw json
-function init_page(papers) {
+function init_pages(papers) {
     console.log(papers)
 
     // Build paper list on left_bar
@@ -66,13 +81,13 @@ function display_paper(d) {
         .text(d.uid)
 
     d3.json("http://localhost:8619/?get=custom").then(function(custom) {
-        update_paper(d, custom)
+        update_paper_info(d, custom)
     })
 
 }
 
 // Update paper using custom information
-function update_paper(d, custom) {
+function update_paper_info(d, custom) {
     // Report
     console.log(d.uid)
 
@@ -115,9 +130,11 @@ function update_custom() {
     url = `http://localhost:8619/?set=custom&uid=${uid}`
     console.log(url)
 
+    title = query_from_textarea("paper_title", "")
+
     $.post(url, {
             date: String(new Date()),
-            title: query_from_textarea("paper_title", ""),
+            title: title,
             keywords: query_from_textarea("paper_keywords", ""),
             comments: query_from_textarea("paper_comments", "")
         },
@@ -126,6 +143,9 @@ function update_custom() {
             console.log(url)
             console.log("Data: " + data + "\nStatus: " + status)
         });
+
+    d3.select("#li-" + uid)
+        .text("[" + title + "]")
 }
 
 // Safety build query with content in textarea
